@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>page2</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous">
+    </script>
+</head>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+    }
+
+    #data-svg {
+        height: 80vh;
+        width: 100vw;
+    }
+
+    .bottom {
+        background-color: rgb(102, 110, 107);
+        min-height: 20vh;
+        width: 100vw;
+        text-align: center;
+    }
+</style>
+
+<body>
+    <div id="data-svg">
+    </div>
+
+    <div class="bottom">
+
+        <br>
+        <h2>
+            This figure shows that with the continuous increase of variable price of the house, the accommodation time
+            of the house is longer and longer. There is a positive correlation between the two groups of variables.
+            Linear regression analysis is adopted in the project
+            Click the
+            button to enter the BACK to  page one</h2>
+        <a href="/page1.html">
+            <button type="button" class="btn btn-primary">BACK</button>
+        </a>
+    </div>
+</body>
+<script src="https://d3js.org/d3.v5.js"></script>
+<script>
+    var height = document.getElementById("data-svg").offsetHeight;
+    var width = document.getElementById("data-svg").offsetWidth;
+
+
+    var svg;
+    savedata = [];
+
+    svg = d3.select("#data-svg")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    window.addEventListener("load", () => {
+        d3.csv("./pythondata.csv").then((data) => {
+            drawd3(data)
+
+        });
+    })
+
+
+
+    function drawd3(data) {
+        savedata = data;
+        console.log(data)
+        svg.selectAll("g").remove();
+        svg.selectAll("circle").remove();
+        svg.selectAll("line").remove();
+
+        //为坐标轴定义一个线性比例尺
+        var yScale = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.y)].reverse())
+            .range([0, height - 50]);
+
+        // console.log(yScale(70))        
+
+        var yAxis = d3.axisLeft(yScale) //定义一个axis，由bottom可知，是朝下的
+            .ticks(40); //设置刻度数目
+
+        var xScale = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.x)])
+            .range([0, width - 60]);
+
+
+        var xAxis = d3.axisBottom(xScale) //定义一个axis，由bottom可知，是朝下的
+            .ticks(100); //设置刻度数目
+
+
+        svg.append("g")
+            .attr("transform", "translate(40,20)")
+            .call(yAxis);
+
+        svg.append("g")
+            .attr("transform", "translate(40," + String(height - 30) + ")")
+            .call(xAxis);
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d, i) {
+                return xScale(d.x) + 30;
+            })
+            .attr("cy", function (d, i) {
+                return yScale(d.y) + 50;
+            })
+            .attr("r", 4)
+            .attr("fill", "red");
+
+
+        linedata = [];
+        linedata[0] = {
+            x: 5,
+            y: 40
+        };
+        linedata[1] = {
+            x: 480,
+            y: 80
+        };
+
+        svg
+            .selectAll('.line')
+            .data(linedata)
+            .enter()
+            .append('line')
+            .attr('style', 'stroke:#039')
+            .attr('curve', 'curve')
+            .attr("stroke-width", 4)
+            .attr("transform", "translate(40,20)")
+            .attr('x1', xScale(linedata[0].x))
+            .attr('y1', yScale(linedata[0].y))
+            .attr('x2', xScale(linedata[1].x))
+            .attr('y2', yScale(linedata[1].y));
+
+    }
+
+
+
+
+
+    window.addEventListener("resize", () => {
+
+        height = document.getElementById("data-svg").offsetHeight;
+        width = document.getElementById("data-svg").offsetWidth;
+
+        svg
+            .attr("width", width)
+            .attr("height", height);
+
+        drawd3(savedata)
+    })
+</script>
+
+</html>
